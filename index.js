@@ -9,6 +9,7 @@ const app = express();
 
 // Middleware 
 app.use(cors())
+app.use(express.json())
 
 
 // Database connction 
@@ -26,6 +27,20 @@ const mongo = new MongoClient(uri, {
 async function run() {
     try{
         await mongo.connect()
+        const database = mongo.db("UMS");
+        const userCollection = database.collection("Users")
+
+        // Getting User From DB 
+        app.get('/users', async(req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(JSON.stringify(result))
+        })
+
+        app.post('/users', async(req, res) =>{
+            const userData = req.body
+            const result = await userCollection.insertOne(userData)
+            res.send(result);                       
+        })
     }
     finally{
 
