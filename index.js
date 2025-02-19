@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const {MongoClient , ServerApiVersion} =require('mongodb');
+const {MongoClient , ServerApiVersion, ObjectId} =require('mongodb');
 
 const port = 5000;
 const app = express();
@@ -35,11 +35,18 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(JSON.stringify(result))
         })
-
+        // Sending Data to the Database 
         app.post('/users', async(req, res) =>{
             const userData = req.body
             const result = await userCollection.insertOne(userData)
             res.send(result);                       
+        })
+        // Deleting data from Database 
+        app.delete('/users/:id', async(req, res) => {
+            const id = req.params.id
+            const query = {_id: new ObjectId(id)}
+            const result = await userCollection.deleteOne(query)
+            res.send(result)
         })
     }
     finally{
