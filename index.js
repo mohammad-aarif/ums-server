@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
+
 require('dotenv').config();
 const {MongoClient , ServerApiVersion, ObjectId} =require('mongodb');
 
@@ -8,8 +11,12 @@ const app = express();
 
 
 // Middleware 
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  }));
 app.use(express.json())
+app.use(cookieParser())
 
 
 // Database connction 
@@ -30,8 +37,18 @@ async function run() {
         const database = mongo.db("UMS");
         const userCollection = database.collection("Users")
 
+        // JWT token generation 
+        app.post('/jwt', (req, res)=>{
+            const data = req.body 
+            const token = jwt.sign(data, process.env.JWT_SECRET, {expiresIn: '1h'})
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false,
+            }).send({success: true})
+        })
+
         // Getting User From DB 
-        app.get('/users', async(req, res) => {
+        app.get('/users', loger, async(req, res) => {
             const result = await userCollection.find().toArray();
             res.send(JSON.stringify(result))
         })
