@@ -37,7 +37,7 @@ async function run() {
         const database = mongo.db("UMS");
         const userCollection = database.collection("Users")
 
-        // JWT token generation 
+        // Set JWT token  
         app.post('/jwt', (req, res)=>{
             const data = req.body 
             const token = jwt.sign(data, process.env.JWT_SECRET, {expiresIn: '1h'})
@@ -46,9 +46,18 @@ async function run() {
                 secure: false,
             }).send({success: true})
         })
+        // Remove JWT token
+        app.post('/logout', (req, res) => {
+            res
+                .clearCookie('token', {
+                    httpOnly: true,
+                    secure: false,
+                })
+                .send({success: true})
+        })
 
         // Getting User From DB 
-        app.get('/users', loger, async(req, res) => {
+        app.get('/users', async(req, res) => {
             const result = await userCollection.find().toArray();
             res.send(JSON.stringify(result))
         })
