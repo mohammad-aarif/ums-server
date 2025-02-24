@@ -71,16 +71,21 @@ async function run() {
                 })
                 .send({success: true})
         })
+        
 
         // Getting User From DB 
         app.get('/users', async(req, res) => {
-            const result = await userCollection.find().toArray();
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const result = await userCollection.find().skip(page*size).limit(size).toArray();
             res.send(JSON.stringify(result))
         })
         app.get('/userscount', async(req, res) => {
             const usersCount = await userCollection.estimatedDocumentCount()
             res.send({usersCount})
         })
+
+
         // Sending Data to the Database 
         app.post('/users', async(req, res) =>{
             const userData = req.body
